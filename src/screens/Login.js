@@ -4,6 +4,7 @@ import { StyleSheet, Text, View, ImageBackground, TextInput, Animated, Dimension
 import { TypingAnimation } from 'react-native-typing-animation';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import * as Animatable from 'react-native-animatable';
+import firebase from '../firebase';
 
 export default class Login extends React.Component{
   constructor(props){
@@ -12,7 +13,9 @@ export default class Login extends React.Component{
       email_typing : false,
       password_typing : false,
       animation_login : new Animated.Value(width-40),
-      enable: true
+      enable: true,
+      email:'',
+      password:''
     }
   }
 
@@ -31,7 +34,7 @@ export default class Login extends React.Component{
     }
   }
 
-  _animation(){
+  _animation(email, password){
     Animated.timing(
       this.state.animation_login,
       {
@@ -46,7 +49,16 @@ export default class Login extends React.Component{
       password_typing: false
       })
     }, 15);
-    this.props.navigation.navigate('MainFlow');
+    try{
+      firebase.auth().signInWithEmailAndPassword(email, password).then(()=>{
+        console.log('User Signed In');
+      }).catch((err)=>{
+        Alert('err',err);
+      })
+    }catch(err){
+      console.log('did not Signed in',err);
+
+    }
   }
  
   render(){
@@ -72,6 +84,8 @@ export default class Login extends React.Component{
                 placeholder="your email..."
                 style={styles.TextInput}
                 onFocus={()=>this._foucus("email")}
+                value={this.state.email}
+                onChangeText={(email)=> this.setState({email})}
                 />
                 {this.state.email_typing ? <TypingAnimation dotColor="#93278f" style={{marginRight:25}}/> : null}
              </View>
@@ -82,11 +96,13 @@ export default class Login extends React.Component{
                 placeholder="your password..."
                 style={styles.TextInput}
                 onFocus={()=>this._foucus("password")} 
+                value={this.state.password}
+                onChangeText={(password)=>this.setState({password})}
                 />
                 {this.state.password_typing ? <TypingAnimation dotColor="#93278f" style={{marginRight:25}}/> : null}
              </View>
               <TouchableOpacity
-              onPress={()=>this._animation()}
+              onPress={()=>this._animation(this.state.email, this.state.password)}
               >
                   <View style={styles.button_container}>
                     <Animated.View style={[styles.animation,{width}]}>
@@ -110,15 +126,23 @@ export default class Login extends React.Component{
                   </View>
               </TouchableOpacity>
               <View style={styles.signUp}>
-                      <Text style={{color:"black"}}>New User?</Text>
-                      <TouchableOpacity onPress={this.props.navigation.navigate('Signup')} >
-                        <Text style={{color:"blue"}}>SignUp?</Text>
+                      <Text style={{color:"black", fontSize:18}}>New User?</Text>
+                      <TouchableOpacity  onPress={()=> this.props.navigation.navigate('Signup')} >
+                        <Text style={{color:"blue",  fontSize:18}}>SignUp?</Text>
               </TouchableOpacity>
                </View>
              </View>
           </View>
   );
 }
+}
+
+
+
+Login.navigationOptions = () =>{
+  return {
+      headerShown: false
+  }
 }
  const width = Dimensions.get("screen").width;
 const styles = StyleSheet.create({
@@ -175,7 +199,7 @@ const styles = StyleSheet.create({
   },
   signUp:{
     flexDirection:"row",
-    justifyContent:"center",
+    justifyContent:"space-around",
     marginTop:20
   }
 })

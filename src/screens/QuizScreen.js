@@ -1,10 +1,20 @@
 import React from 'react';
-import {View, Text} from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import { StyleSheet, Text, View, ImageBackground, Image, ScrollView } from 'react-native';
+import Card from '../components/Card';
 
 const QuizScreen = () =>{
-    return <View>
-        <Text>Quiz Screen</Text>
-    </View>
+    return <View style={{paddingTop:30, backgroundColor:'#f0f0f0', flex:1}}>
+    <StatusBar style="dark"  />
+    {/* <Header headerText="Account"/> */}
+    <ScrollView>
+    <Card />
+    <Card />
+    <Card />
+    <Card />
+    <Card />
+    </ScrollView>
+ </View>
 }
 
 export default QuizScreen;

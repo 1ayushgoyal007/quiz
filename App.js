@@ -11,9 +11,11 @@ import HomeScreen from './src/screens/HomeScreen';
 import QuizScreen from './src/screens/QuizScreen';
 import AccountScreen from './src/screens/AccountScreen';
 import Matriminial from './src/screens/Matriminial';
+import KidsScreen from './src/screens/KidsScreen';
+import LoadingScreen from './src/screens/LoadingScreen';
 
 const navigator = createSwitchNavigator({
-  //Loading: LoadingScreen,
+  Loading: LoadingScreen,
   LoginFlow: createStackNavigator({
     Login:Login,
     Signup: SignupScreen
@@ -32,5 +34,6 @@ const navigator = createSwitchNavigator({
 var App = createAppContainer(navigator);
 
 export default ()=>{
+  console.disableYellowBox = true;
   return <App />
 }

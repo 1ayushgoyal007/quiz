@@ -8,6 +8,7 @@ import { TypingAnimation } from 'react-native-typing-animation';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import * as Animatable from 'react-native-animatable';
 import firebase from '../firebase';
+import Spinner from '../components/Spinner';
 
 export default class SignupScreen extends React.Component{
   constructor(props){
@@ -22,6 +23,7 @@ export default class SignupScreen extends React.Component{
       email:'',
       password:'',
       msg:'',
+      status:false
     }
   }
 
@@ -41,32 +43,32 @@ export default class SignupScreen extends React.Component{
   }
 
   _animation(name,email, password ){
-    // Animated.timing(
-    //   this.state.animation_login,
-    //   {
-    //     toValue: 40,
-    //     duration: 250,
-    //   }
-    // ).start();
-
-    // setTimeout(() => {
-    //   this.setState({enable : false,
-    //   email_typing: false,
-    //   password_typing: false
-    //   })
-    // }, 15);
+    this.setState({status:true})
 
     if(!email.length || !name.length || !password.length ){
-      this.setState({msg:'Invalid Credentials'});
+      this.setState({msg:'Invalid Credentials', status:false});
     }else{
     console.log('name', name, email, password);
 
     try{
 
-     firebase.auth().createUserWithEmailAndPassword(email, password).then(()=>{
-      console.log('User Created');
-      this.setState({msg:'Account Created, Now Login'})
-    });
+     firebase.auth().createUserWithEmailAndPassword(email, password).then((user)=>{
+      console.log('User Created', user.user.uid );
+      firebase.database().ref(`/users/${user.user.uid}`).set({
+        name:name,
+        email:email,
+        password:password,
+        created_at: Date.now()
+      }).then(()=>{
+        console.log('entering db');
+        this.setState({msg:'Account Created'});
+      });
+
+    }).catch((err)=>{
+      this.setState({status:false, msg:'invalid username or password'})
+      console.log(err, typeof(err));
+      console.log(err[0]);
+    })
     
   }
   catch(err){
@@ -128,30 +130,17 @@ export default class SignupScreen extends React.Component{
                 />
                 {this.state.password_typing ? <TypingAnimation dotColor="#93278f" style={{marginRight:25}}/> : null}
              </View>
+             {this.state.status? 
+             <View style={{marginTop:30}} >
+                <Spinner />
+             </View>:
               <TouchableOpacity
               onPress={()=>this._animation(this.state.name, this.state.email, this.state.password)}
               >
                   <View style={styles.button_container}>
-                    <Animated.View style={[styles.animation,{width}]}>
-                      {this.state.enable ?
                       <Text style={styles.textButton}>Create Account</Text>
-                      :
-                      <Animatable.View
-                      animation="bounceIn"
-                      delay={50}
-                      >
-                      <FontAwesome 
-                      name="check"
-                      color="white"
-                      size= {20}
-                      />
-                       {this.props.navigation.navigate('Connector')}
-                      </Animatable.View>
-                      
-                      }
-                      </Animated.View>
                   </View>
-              </TouchableOpacity>
+              </TouchableOpacity>}
               <View >
                     <Text style={{fontSize:18, marginTop:20, color:'red', textAlign:'center'}} >{this.state.msg}</Text>
               </View>
@@ -213,7 +202,12 @@ const styles = StyleSheet.create({
   },
   button_container:{
     justifyContent:"center",
-    alignItems:"center"
+    alignItems:"center",
+    backgroundColor:"#93278f",
+    paddingVertical:10,
+    marginTop:30,
+    borderRadius:100,
+
   },
   animation:{
     backgroundColor:"#93278f",

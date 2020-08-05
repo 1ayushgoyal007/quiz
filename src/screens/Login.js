@@ -1,10 +1,12 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { StyleSheet, Text, View, ImageBackground, TextInput, Animated, Dimensions, TouchableOpacity} from 'react-native';
+import { StyleSheet, Text, View, ImageBackground, TextInput, Animated, Dimensions, TouchableOpacity, Alert} from 'react-native';
 import { TypingAnimation } from 'react-native-typing-animation';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import * as Animatable from 'react-native-animatable';
 import firebase from '../firebase';
+import Spinner from '../components/Spinner';
+
 
 export default class Login extends React.Component{
   constructor(props){
@@ -15,7 +17,8 @@ export default class Login extends React.Component{
       animation_login : new Animated.Value(width-40),
       enable: true,
       email:'',
-      password:''
+      password:'',
+      status: false
     }
   }
 
@@ -35,25 +38,15 @@ export default class Login extends React.Component{
   }
 
   _animation(email, password){
-    Animated.timing(
-      this.state.animation_login,
-      {
-        toValue: 40,
-        duration: 250,
-      }
-    ).start();
-
-    setTimeout(() => {
-      this.setState({enable : false,
-      email_typing: false,
-      password_typing: false
-      })
-    }, 15);
+  
+    this.setState({status:true})
     try{
       firebase.auth().signInWithEmailAndPassword(email, password).then(()=>{
         console.log('User Signed In');
       }).catch((err)=>{
-        Alert('err',err);
+        this.setState({status:false})
+        console.log(err);
+        
       })
     }catch(err){
       console.log('did not Signed in',err);
@@ -101,30 +94,17 @@ export default class Login extends React.Component{
                 />
                 {this.state.password_typing ? <TypingAnimation dotColor="#93278f" style={{marginRight:25}}/> : null}
              </View>
+            {this.state.status? 
+            <View style={{marginTop:30}} >
+              <Spinner />
+            </View>:
               <TouchableOpacity
-              onPress={()=>this._animation(this.state.email, this.state.password)}
+                onPress={()=>this._animation(this.state.email, this.state.password)}
               >
                   <View style={styles.button_container}>
-                    <Animated.View style={[styles.animation,{width}]}>
-                      {this.state.enable ?
                       <Text style={styles.textButton}>Login</Text>
-                      :
-                      <Animatable.View
-                      animation="bounceIn"
-                      delay={50}
-                      >
-                      <FontAwesome 
-                      name="check"
-                      color="white"
-                      size= {20}
-                      />
-                       {this.props.navigation.navigate('Connector')}
-                      </Animatable.View>
-                      
-                      }
-                      </Animated.View>
                   </View>
-              </TouchableOpacity>
+              </TouchableOpacity>}
               <View style={styles.signUp}>
                       <Text style={{color:"black", fontSize:18}}>New User?</Text>
                       <TouchableOpacity  onPress={()=> this.props.navigation.navigate('Signup')} >
@@ -182,7 +162,11 @@ const styles = StyleSheet.create({
   },
   button_container:{
     justifyContent:"center",
-    alignItems:"center"
+    alignItems:"center",
+    backgroundColor:"#93278f",
+    paddingVertical:10,
+    marginTop:30,
+    borderRadius:100,
   },
   animation:{
     backgroundColor:"#93278f",

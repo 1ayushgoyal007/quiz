@@ -6,7 +6,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import * as Animatable from 'react-native-animatable';
 import firebase from '../firebase';
 import Spinner from '../components/Spinner';
-
+import Spacer from '../components/Spacer';
 
 export default class Login extends React.Component{
   constructor(props){
@@ -18,7 +18,8 @@ export default class Login extends React.Component{
       enable: true,
       email:'',
       password:'',
-      status: false
+      status: false,
+      msg:''
     }
   }
 
@@ -37,14 +38,16 @@ export default class Login extends React.Component{
     }
   }
 
+  
+
   _animation(email, password){
   
-    this.setState({status:true})
+    this.setState({status:true, msg:''})
     try{
       firebase.auth().signInWithEmailAndPassword(email, password).then(()=>{
         console.log('User Signed In');
       }).catch((err)=>{
-        this.setState({status:false})
+        this.setState({status:false, msg:'Invalid Username or password'})
         console.log(err);
         
       })
@@ -55,6 +58,10 @@ export default class Login extends React.Component{
   }
  
   render(){
+    const loginMsg = this.props.navigation.getParam('loginMsg');
+
+    console.log('here is the message which should be displayed', loginMsg);
+
     const width = this.state.animation_login; 
     return (
       <View style={styles.container}>
@@ -105,6 +112,8 @@ export default class Login extends React.Component{
                       <Text style={styles.textButton}>Login</Text>
                   </View>
               </TouchableOpacity>}
+              <Spacer />
+              <Text style={{textAlign:'center', color:'red', fontSize:18}} >{this.state.msg}</Text>
               <View style={styles.signUp}>
                       <Text style={{color:"black", fontSize:18}}>New User?</Text>
                       <TouchableOpacity  onPress={()=> this.props.navigation.navigate('Signup')} >

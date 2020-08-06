@@ -31,19 +31,28 @@ export default class SignupScreen extends React.Component{
     if(value == "email"){
       this.setState({
         email_typing : true,
-        password_typing : false
+        password_typing : false,
+        name_typing:false
+      })
+    }
+    else if(value=="name"){
+      this.setState({
+        email_typing : false,
+        password_typing : false,
+        name_typing:true
       })
     }
     else{
       this.setState({
         email_typing : false,
-        password_typing : true
+        password_typing : true,
+        name_typing:false
       })
     }
   }
 
   _animation(name,email, password ){
-    this.setState({status:true})
+    this.setState({status:true, msg:''})
 
     if(!email.length || !name.length || !password.length ){
       this.setState({msg:'Invalid Credentials', status:false});
@@ -57,22 +66,22 @@ export default class SignupScreen extends React.Component{
       firebase.database().ref(`/users/${user.user.uid}`).set({
         name:name,
         email:email,
-        password:password,
         created_at: Date.now()
       }).then(()=>{
         console.log('entering db');
+        // this.props.navigation.navigate('Verify');
         this.setState({msg:'Account Created'});
       });
 
     }).catch((err)=>{
-      this.setState({status:false, msg:'invalid username or password'})
-      console.log(err, typeof(err));
-      console.log(err[0]);
+      this.setState({status:false, msg:err.message })
+      console.log(err, typeof(err), err.message, typeof(err.message) );
+      
     })
     
   }
   catch(err){
-      console.log('Failed creating User');
+      console.log('Failed creating User', err);
       this.setState({msg:'Could not create User'});
   }
 }
@@ -99,7 +108,7 @@ export default class SignupScreen extends React.Component{
                 <TextInput 
                 placeholder="Enter Name "
                 style={styles.TextInput}
-                onFocus={()=>this._foucus("email")}
+                onFocus={()=>this._foucus("name")}
                 value={this.state.name}
                 onChangeText={(name)=> this.setState({name})}
                 />

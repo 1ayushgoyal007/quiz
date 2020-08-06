@@ -1,13 +1,30 @@
 import React, {useState, useEffect} from 'react';
 import {View, Text, ActivityIndicator, StyleSheet} from 'react-native';
+import {
+    BallIndicator,
+    BarIndicator,
+    DotIndicator,
+    MaterialIndicator,
+    PacmanIndicator,
+    PulseIndicator,
+    SkypeIndicator,
+    UIActivityIndicator,
+    WaveIndicator,
+  } from 'react-native-indicators';
 import firebase from '../firebase';
 const LoadingScreen = ({ navigation}) =>{
 
     const isLoggedIn = () =>{
         firebase.auth().onAuthStateChanged(function(user){
             if(user){
-                console.log('Going or main flow');
-                navigation.navigate('MainFlow');
+                console.log('email verfication',user.emailVerified);
+                if(user.emailVerified){
+                    console.log('going to main')
+                    navigation.navigate('MainFlow');
+                }else{
+                    console.log('gonna verify');
+                    navigation.navigate('Verify');
+                }
             }else{
                 console.log('Going to login flow');
 
@@ -22,7 +39,7 @@ const LoadingScreen = ({ navigation}) =>{
 
     return <View style={styles.container} >
         <View style={styles.main} >
-            <ActivityIndicator size='large' />
+        <BarIndicator color='purple' />
         </View>
     </View>
 }
